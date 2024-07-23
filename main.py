@@ -6,6 +6,7 @@ import csv
 import os
 import pypinyin
 from bs4 import BeautifulSoup
+import pandas as pd
 
 def get_location(city, line, mykey):
     print("请耐心等待")
@@ -103,6 +104,26 @@ def main(city):
     pattern = r"'(.*?)'"     #最后，这个代码片段将匹配到的所有子字符串存储在一个名为data的列表中
     matches = re.findall(pattern, word)    #findall() 函数，在字符串 word 中查找与给定模式 pattern 匹配的所有子字符串。findall() 函数会返回一个包含所有匹配结果的列表
     data = list(matches)
+
+    ##########################################################
+    # 查询多余的线路数据
+    # 读取Excel数据
+    file_path = '数据\天津公交站点-剔除未有路线.xlsx'
+    df = pd.read_excel(file_path)
+
+    # 按照线路分组，汇总每条线路的站点名为集合
+    route_stations = df.groupby('路线')['名称'].apply(set)
+
+    # 获取所有线路名称的集合
+    route_names = set(route_stations.index)
+
+    # 转集合进行集合运算
+    data = set(data)
+
+    # 查找data中多余的元素
+    data = list(data - route_names)
+    #############################################################
+
     a = 0
     # city_chinese="长沙"
     f = open(f'{city}公交站点.csv', 'a', encoding='utf-8-sig', newline="")
